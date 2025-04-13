@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Auth App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100 py-12">
+    <div class="bg-white p-8 rounded-lg shadow-2xl w-96 backdrop-blur-lg bg-opacity-90">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+            <p class="text-gray-600">Fill in the details to register</p>
+        </div>
+
+        <form id="registerForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="username">
+                    Username
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-user text-gray-400"></i>
+                    </span>
+                    <input type="text" id="username" name="username" required
+                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Choose a username">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="password">
+                    Password
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-lock text-gray-400"></i>
+                    </span>
+                    <input type="password" id="password" name="password" required
+                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Choose a password">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="permission">
+                    Permission Level
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-shield-alt text-gray-400"></i>
+                    </span>
+                    <select id="permission" name="permission" required
+                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="validity">
+                    Account Validity Date
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-calendar text-gray-400"></i>
+                    </span>
+                    <input type="date" id="validity" name="validity" required
+                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="securityCode">
+                    Security Code
+                </label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-key text-gray-400"></i>
+                    </span>
+                    <input type="password" id="securityCode" name="securityCode" required
+                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter security code">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
+                    Create Account
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-gray-600">Already have an account?
+                <a href="login.html" class="text-blue-600 hover:text-blue-700 font-medium">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize users in localStorage if not exists
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const permission = document.getElementById('permission').value;
+            const validity = document.getElementById('validity').value;
+            const securityCode = document.getElementById('securityCode').value;
+
+            if (securityCode !== '123456') {
+                alert('Invalid security code');
+                return;
+            }
+
+            try {
+                const users = JSON.parse(localStorage.getItem('users'));
+
+                // Check if username already exists
+                if (users.some(u => u.username === username)) {
+                    alert('Username already exists');
+                    return;
+                }
+
+                // Create new user
+                const newUser = {
+                    username,
+                    password,
+                    permission,
+                    create_account: new Date().toISOString(),
+                    last_login: null,
+                    login_duration: 0,
+                    account_validity: validity
+                };
+
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+
+                alert('Account created successfully!');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Error during registration:', error);
+                alert('An error occurred during registration. Please try again.');
+            }
+        });
+
+        // Set minimum date as today for validity
+        const validityInput = document.getElementById('validity');
+        const today = new Date().toISOString().split('T')[0];
+        validityInput.min = today;
+    </script>
+</body>
+</html>
