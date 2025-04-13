@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Record - Auth App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-gray-800 mr-4">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <span class="text-xl font-bold text-gray-800">Add New Record</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Add Record Form -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <form id="recordForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="title">
+                                Record Title
+                            </label>
+                            <input type="text" id="title" name="title" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Enter record title">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="category">
+                                Category
+                            </label>
+                            <select id="category" name="category" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select a category</option>
+                                <option value="general">General</option>
+                                <option value="important">Important</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="description">
+                                Description
+                            </label>
+                            <textarea id="description" name="description" rows="4" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Enter record description"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="date">
+                                Date
+                            </label>
+                            <input type="date" id="date" name="date" required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <button type="submit"
+                                class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
+                                Save Record
+                            </button>
+                            <button type="reset"
+                                class="bg-gray-200 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300">
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Records -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Records</h3>
+                    <div id="recentRecords" class="space-y-4">
+                        <!-- Recent records will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        // Initialize records in localStorage if not exists
+        if (!localStorage.getItem('records')) {
+            localStorage.setItem('records', '[]');
+        }
+
+        function loadRecentRecords() {
+            try {
+                const records = JSON.parse(localStorage.getItem('records') || '[]');
+                const recentRecordsDiv = document.getElementById('recentRecords');
+                recentRecordsDiv.innerHTML = '';
+
+                // Display 5 most recent records
+                records.slice(-5).reverse().forEach(record => {
+                    const recordElement = document.createElement('div');
+                    recordElement.className = 'p-4 border rounded-lg hover:bg-gray-50';
+                    recordElement.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-medium text-gray-800">${record.title}</h4>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${getCategoryColor(record.category)}-100 text-${getCategoryColor(record.category)}-800">
+                                ${record.category}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">${record.description.substring(0, 50)}${record.description.length > 50 ? '...' : ''}</p>
+                        <p class="text-xs text-gray-500 mt-2">${new Date(record.date).toLocaleDateString()}</p>
+                    `;
+                    recentRecordsDiv.appendChild(recordElement);
+                });
+            } catch (error) {
+                console.error('Error loading recent records:', error);
+            }
+        }
+
+        function getCategoryColor(category) {
+            switch (category) {
+                case 'urgent': return 'red';
+                case 'important': return 'yellow';
+                default: return 'blue';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('recordForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newRecord = {
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                date: document.getElementById('date').value,
+                created_at: new Date().toISOString(),
+                created_by: currentUser
+            };
+
+            try {
+                const records = JSON.parse(localStorage.getItem('records') || '[]');
+                records.push(newRecord);
+                localStorage.setItem('records', JSON.stringify(records));
+
+                // Show success message
+                alert('Record added successfully!');
+
+                // Clear form
+                e.target.reset();
+
+                // Reload recent records
+                loadRecentRecords();
+            } catch (error) {
+                console.error('Error saving record:', error);
+                alert('Error saving record. Please try again.');
+            }
+        });
+
+        // Set minimum date as today
+        document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+        // Load initial records
+        loadRecentRecords();
+    </script>
+</body>
+</html>
