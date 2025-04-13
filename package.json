@@ -1,0 +1,16 @@
+{
+  "name": "electron-auth-app",
+  "version": "1.0.0",
+  "description": "Electron authentication app with dashboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "electron": "^25.9.8"
+  }
+}
