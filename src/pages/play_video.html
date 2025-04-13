@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Auth App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .video-container {
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="dashboard.html" class="text-gray-600 hover:text-gray-800 mr-4">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <span class="text-xl font-bold text-gray-800">Video Player</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Video Player -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="video-container rounded-lg overflow-hidden mb-4">
+                        <video id="videoElement" autoplay muted></video>
+                    </div>
+
+                    <!-- Video Controls -->
+                    <div class="flex flex-wrap items-center gap-4">
+                        <button id="startBtn" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
+                            <i class="fas fa-video"></i> Start Camera
+                        </button>
+                        <button id="recordBtn" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300" disabled>
+                            <i class="fas fa-circle"></i> Record
+                        </button>
+                        <button id="stopBtn" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button id="playBtn" class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-300" disabled>
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button id="downloadBtn" class="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-300" disabled>
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+
+                    <!-- Recording Status -->
+                    <div class="mt-4">
+                        <p id="recordingStatus" class="text-gray-600"></p>
+                        <p id="recordingTime" class="text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recording History -->
+            <div class="md:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recording History</h3>
+                    <div id="recordingHistory" class="space-y-4">
+                        <!-- Recording history will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        }
+
+        // Initialize recordings in localStorage if not exists
+        if (!localStorage.getItem('recordings')) {
+            localStorage.setItem('recordings', '[]');
+        }
+
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let recordingInterval;
+        let recordingStartTime;
+
+        const videoElement = document.getElementById('videoElement');
+        const startBtn = document.getElementById('startBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const playBtn = document.getElementById('playBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const recordingTime = document.getElementById('recordingTime');
+
+        // Start camera
+        startBtn.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                videoElement.srcObject = stream;
+                startBtn.disabled = true;
+                recordBtn.disabled = false;
+                recordingStatus.textContent = 'Camera started';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                recordingStatus.textContent = 'Error accessing camera';
+            }
+        });
+
+        // Start recording
+        recordBtn.addEventListener('click', () => {
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                addToHistory(url);
+                playBtn.disabled = false;
+                downloadBtn.disabled = false;
+            };
+
+            mediaRecorder.start();
+            recordingStartTime = Date.now();
+            updateRecordingTime();
+            recordingInterval = setInterval(updateRecordingTime, 1000);
+
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            recordingStatus.textContent = 'Recording...';
+        });
+
+        // Stop recording
+        stopBtn.addEventListener('click', () => {
+            mediaRecorder.stop();
+            clearInterval(recordingInterval);
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            recordingStatus.textContent = 'Recording stopped';
+            recordingTime.textContent = '';
+        });
+
+        // Play recorded video
+        playBtn.addEventListener('click', () => {
+            if (recordedChunks.length > 0) {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                videoElement.srcObject = null;
+                videoElement.src = URL.createObjectURL(blob);
+                videoElement.play();
+            }
+        });
+
+        // Download recorded video
+        downloadBtn.addEventListener('click', () => {
+            if (recordedChunks.length > 0) {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `recording-${new Date().toISOString()}.webm`;
+                a.click();
+            }
+        });
+
+        function updateRecordingTime() {
+            const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            recordingTime.textContent = `Recording Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function addToHistory(videoUrl) {
+            try {
+                const recordings = JSON.parse(localStorage.getItem('recordings') || '[]');
+                const newRecording = {
+                    url: videoUrl,
+                    timestamp: new Date().toISOString(),
+                    user: currentUser
+                };
+                recordings.push(newRecording);
+                localStorage.setItem('recordings', JSON.stringify(recordings));
+                updateHistoryDisplay();
+            } catch (error) {
+                console.error('Error saving recording to history:', error);
+            }
+        }
+
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('recordingHistory');
+            const recordings = JSON.parse(localStorage.getItem('recordings') || '[]');
+            
+            historyDiv.innerHTML = '';
+            recordings.slice().reverse().forEach(recording => {
+                const recordingEntry = document.createElement('div');
+                recordingEntry.className = 'p-4 border rounded-lg hover:bg-gray-50';
+                
+                const timestamp = new Date(recording.timestamp).toLocaleString();
+                recordingEntry.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-800">Recording at ${timestamp}</span>
+                        <button onclick="playRecording('${recording.url}')" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">By ${recording.user}</p>
+                `;
+                
+                historyDiv.appendChild(recordingEntry);
+            });
+        }
+
+        function playRecording(url) {
+            videoElement.srcObject = null;
+            videoElement.src = url;
+            videoElement.play();
+        }
+
+        // Clean up when leaving the page
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Initial history display
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
