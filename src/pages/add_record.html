@@ -34,44 +34,93 @@
             <!-- Add Record Form -->
             <div class="md:col-span-2">
                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <!-- Instructions -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <h3 class="text-blue-800 font-semibold mb-2">How to use local files:</h3>
+                        <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                            <li>Copy your images to: /assets/images/</li>
+                            <li>Copy your videos to: /assets/videos/</li>
+                            <li>Use paths like: ./assets/images/your-image.jpg</li>
+                            <li>Use paths like: ./assets/videos/your-video.mp4</li>
+                        </ol>
+                    </div>
+
                     <form id="recordForm" class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2" for="title">
-                                Record Title
+                                Title
                             </label>
                             <input type="text" id="title" name="title" required
                                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter record title">
+                                placeholder="Enter title">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2" for="category">
-                                Category
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="imageLink">
+                                Image Path
                             </label>
-                            <select id="category" name="category" required
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="imageLink" name="imageLink" required
+                                    class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Example: ./assets/images/your-image.jpg">
+                                <button type="button" onclick="previewImage()"
+                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                    Preview
+                                </button>
+                            </div>
+                            <div id="imagePreview" class="mt-2 hidden">
+                                <img src="" alt="Preview" class="max-h-40 rounded-lg">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="videoLink">
+                                Video Path
+                            </label>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" id="videoLink" name="videoLink" required
+                                    class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="Example: ./assets/videos/your-video.mp4">
+                                <button type="button" onclick="previewVideo()"
+                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                    Preview
+                                </button>
+                            </div>
+                            <div id="videoPreview" class="mt-2 hidden">
+                                <video controls class="max-h-40 rounded-lg">
+                                    <source src="" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="class">
+                                Class
+                            </label>
+                            <select id="class" name="class" required
                                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select a category</option>
-                                <option value="general">General</option>
-                                <option value="important">Important</option>
-                                <option value="urgent">Urgent</option>
+                                <option value="">Select Class</option>
+                                <option value="6">Class 6</option>
+                                <option value="7">Class 7</option>
+                                <option value="8">Class 8</option>
+                                <option value="9">Class 9</option>
+                                <option value="10">Class 10</option>
+                                <option value="11">Class 11</option>
+                                <option value="12">Class 12</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2" for="description">
-                                Description
+                            <label class="block text-sm font-medium text-gray-700 mb-2" for="ncertCbse">
+                                NCERT/CBSE
                             </label>
-                            <textarea id="description" name="description" rows="4" required
-                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter record description"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2" for="date">
-                                Date
-                            </label>
-                            <input type="date" id="date" name="date" required
+                            <select id="ncertCbse" name="ncertCbse" required
                                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select Type</option>
+                                <option value="NCERT">NCERT</option>
+                                <option value="CBSE">CBSE</option>
+                            </select>
                         </div>
 
                         <div class="flex items-center space-x-4">
@@ -107,14 +156,72 @@
             window.location.href = 'login.html';
         }
 
-        // Initialize records in localStorage if not exists
-        if (!localStorage.getItem('records')) {
-            localStorage.setItem('records', '[]');
+        async function loadRecords() {
+            try {
+                const response = await fetch('../database/records.json');
+                const data = await response.json();
+                return data.records || [];
+            } catch (error) {
+                console.error('Error loading records:', error);
+                return [];
+            }
         }
 
-        function loadRecentRecords() {
+        async function saveRecord(newRecord) {
             try {
-                const records = JSON.parse(localStorage.getItem('records') || '[]');
+                const records = await loadRecords();
+                records.push(newRecord);
+                
+                // Create a download link for the updated records.json
+                const blob = new Blob([JSON.stringify({ records: records }, null, 2)], { type: 'application/json' });
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = 'records.json';
+                downloadLink.click();
+                
+                alert('Record added successfully! Please save the records.json file to the src/database directory.');
+                return true;
+            } catch (error) {
+                console.error('Error saving record:', error);
+                return false;
+            }
+        }
+
+        function previewImage() {
+            const imageLink = document.getElementById('imageLink').value;
+            const preview = document.getElementById('imagePreview');
+            const img = preview.querySelector('img');
+            
+            if (imageLink) {
+                img.src = imageLink;
+                img.onload = () => {
+                    preview.classList.remove('hidden');
+                };
+                img.onerror = () => {
+                    alert('Could not load image. Please check the path.');
+                    preview.classList.add('hidden');
+                };
+            }
+        }
+
+        function previewVideo() {
+            const videoLink = document.getElementById('videoLink').value;
+            const preview = document.getElementById('videoPreview');
+            const video = preview.querySelector('video');
+            
+            if (videoLink) {
+                video.src = videoLink;
+                preview.classList.remove('hidden');
+                video.onerror = () => {
+                    alert('Could not load video. Please check the path.');
+                    preview.classList.add('hidden');
+                };
+            }
+        }
+
+        async function loadRecentRecords() {
+            try {
+                const records = await loadRecords();
                 const recentRecordsDiv = document.getElementById('recentRecords');
                 recentRecordsDiv.innerHTML = '';
 
@@ -125,12 +232,11 @@
                     recordElement.innerHTML = `
                         <div class="flex items-center justify-between">
                             <h4 class="text-sm font-medium text-gray-800">${record.title}</h4>
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${getCategoryColor(record.category)}-100 text-${getCategoryColor(record.category)}-800">
-                                ${record.category}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                Class ${record.class}
                             </span>
                         </div>
-                        <p class="text-sm text-gray-600 mt-1">${record.description.substring(0, 50)}${record.description.length > 50 ? '...' : ''}</p>
-                        <p class="text-xs text-gray-500 mt-2">${new Date(record.date).toLocaleDateString()}</p>
+                        <p class="text-xs text-gray-500 mt-1">${record.ncertCbse}</p>
                     `;
                     recentRecordsDiv.appendChild(recordElement);
                 });
@@ -139,48 +245,32 @@
             }
         }
 
-        function getCategoryColor(category) {
-            switch (category) {
-                case 'urgent': return 'red';
-                case 'important': return 'yellow';
-                default: return 'blue';
-            }
-        }
-
         // Handle form submission
-        document.getElementById('recordForm').addEventListener('submit', (e) => {
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const newRecord = {
+                id: Date.now().toString(),
                 title: document.getElementById('title').value,
-                category: document.getElementById('category').value,
-                description: document.getElementById('description').value,
-                date: document.getElementById('date').value,
+                imageLink: document.getElementById('imageLink').value,
+                videoLink: document.getElementById('videoLink').value,
+                class: document.getElementById('class').value,
+                ncertCbse: document.getElementById('ncertCbse').value,
                 created_at: new Date().toISOString(),
                 created_by: currentUser
             };
 
-            try {
-                const records = JSON.parse(localStorage.getItem('records') || '[]');
-                records.push(newRecord);
-                localStorage.setItem('records', JSON.stringify(records));
-
-                // Show success message
-                alert('Record added successfully!');
-
+            const success = await saveRecord(newRecord);
+            if (success) {
                 // Clear form
                 e.target.reset();
+                document.getElementById('imagePreview').classList.add('hidden');
+                document.getElementById('videoPreview').classList.add('hidden');
 
                 // Reload recent records
                 loadRecentRecords();
-            } catch (error) {
-                console.error('Error saving record:', error);
-                alert('Error saving record. Please try again.');
             }
         });
-
-        // Set minimum date as today
-        document.getElementById('date').min = new Date().toISOString().split('T')[0];
 
         // Load initial records
         loadRecentRecords();
