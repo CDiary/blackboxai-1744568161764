@@ -10,20 +10,20 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: url('https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-image: url('https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
             background-size: cover;
             background-position: center;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-100 py-12">
+<body class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-lg shadow-2xl w-96 backdrop-blur-lg bg-opacity-90">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-            <p class="text-gray-600">Fill in the details to register</p>
+            <p class="text-gray-600">Join us today</p>
         </div>
 
-        <form id="registerForm" class="space-y-4">
+        <form id="registerForm" class="space-y-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2" for="username">
                     Username
@@ -48,36 +48,7 @@
                     </span>
                     <input type="password" id="password" name="password" required
                         class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Choose a password">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2" for="permission">
-                    Permission Level
-                </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="fas fa-shield-alt text-gray-400"></i>
-                    </span>
-                    <select id="permission" name="permission" required
-                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2" for="validity">
-                    Account Validity Date
-                </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="fas fa-calendar text-gray-400"></i>
-                    </span>
-                    <input type="date" id="validity" name="validity" required
-                        class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        placeholder="Create a password">
                 </div>
             </div>
 
@@ -87,7 +58,7 @@
                 </label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="fas fa-key text-gray-400"></i>
+                        <i class="fas fa-shield-alt text-gray-400"></i>
                     </span>
                     <input type="password" id="securityCode" name="securityCode" required
                         class="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -111,9 +82,37 @@
     </div>
 
     <script>
-        // Initialize users in localStorage if not exists
-        if (!localStorage.getItem('users')) {
-            localStorage.setItem('users', JSON.stringify([]));
+        const SECURITY_CODE = '123456'; // Default security code
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('../database/users.json');
+                const data = await response.json();
+                return data.users;
+            } catch (error) {
+                console.error('Error loading users:', error);
+                return [];
+            }
+        }
+
+        async function saveUser(user) {
+            try {
+                const users = await loadUsers();
+                users.push(user);
+                
+                // Create a download link for the updated users.json
+                const blob = new Blob([JSON.stringify({ users: users }, null, 2)], { type: 'application/json' });
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = 'users.json';
+                downloadLink.click();
+                
+                alert('User registered successfully! Please save the users.json file to the src/database directory.');
+                return true;
+            } catch (error) {
+                console.error('Error saving user:', error);
+                return false;
+            }
         }
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
@@ -121,50 +120,37 @@
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const permission = document.getElementById('permission').value;
-            const validity = document.getElementById('validity').value;
             const securityCode = document.getElementById('securityCode').value;
-
-            if (securityCode !== '123456') {
+            
+            if (securityCode !== SECURITY_CODE) {
                 alert('Invalid security code');
                 return;
             }
-
+            
             try {
-                const users = JSON.parse(localStorage.getItem('users'));
-
-                // Check if username already exists
+                const users = await loadUsers();
                 if (users.some(u => u.username === username)) {
                     alert('Username already exists');
                     return;
                 }
-
-                // Create new user
+                
                 const newUser = {
                     username,
                     password,
-                    permission,
-                    create_account: new Date().toISOString(),
+                    created_at: new Date().toISOString(),
                     last_login: null,
-                    login_duration: 0,
-                    account_validity: validity
+                    login_duration: 0
                 };
-
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
-
-                alert('Account created successfully!');
-                window.location.href = 'login.html';
+                
+                const success = await saveUser(newUser);
+                if (success) {
+                    window.location.href = 'login.html';
+                }
             } catch (error) {
                 console.error('Error during registration:', error);
                 alert('An error occurred during registration. Please try again.');
             }
         });
-
-        // Set minimum date as today for validity
-        const validityInput = document.getElementById('validity');
-        const today = new Date().toISOString().split('T')[0];
-        validityInput.min = today;
     </script>
 </body>
 </html>
