@@ -3,22 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player - Auth App</title>
+    <title>Videos - Auth App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-        }
-        .video-container {
-            aspect-ratio: 16/9;
-            background: #000;
-        }
-        #videoElement {
-            width: 100%;
-            height: 100%;
-            background: #000;
         }
     </style>
 </head>
@@ -31,7 +22,7 @@
                     <a href="dashboard.html" class="text-gray-600 hover:text-gray-800 mr-4">
                         <i class="fas fa-arrow-left"></i> Back to Dashboard
                     </a>
-                    <span class="text-xl font-bold text-gray-800">Video Player</span>
+                    <span class="text-xl font-bold text-gray-800">Video Library</span>
                 </div>
             </div>
         </div>
@@ -39,50 +30,52 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Video Player -->
-            <div class="md:col-span-2">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <div class="video-container rounded-lg overflow-hidden mb-4">
-                        <video id="videoElement" autoplay muted></video>
-                    </div>
-
-                    <!-- Video Controls -->
-                    <div class="flex flex-wrap items-center gap-4">
-                        <button id="startBtn" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-300">
-                            <i class="fas fa-video"></i> Start Camera
-                        </button>
-                        <button id="recordBtn" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-300" disabled>
-                            <i class="fas fa-circle"></i> Record
-                        </button>
-                        <button id="stopBtn" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-300" disabled>
-                            <i class="fas fa-stop"></i> Stop
-                        </button>
-                        <button id="playBtn" class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-300" disabled>
-                            <i class="fas fa-play"></i> Play
-                        </button>
-                        <button id="downloadBtn" class="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-300" disabled>
-                            <i class="fas fa-download"></i> Download
-                        </button>
-                    </div>
-
-                    <!-- Recording Status -->
-                    <div class="mt-4">
-                        <p id="recordingStatus" class="text-gray-600"></p>
-                        <p id="recordingTime" class="text-gray-600"></p>
-                    </div>
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="classFilter">
+                        Class
+                    </label>
+                    <select id="classFilter" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Classes</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                        <option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                        <option value="11">Class 11</option>
+                        <option value="12">Class 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="typeFilter">
+                        Type
+                    </label>
+                    <select id="typeFilter" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Types</option>
+                        <option value="NCERT">NCERT</option>
+                        <option value="CBSE">CBSE</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="searchInput">
+                        Search
+                    </label>
+                    <input type="text" id="searchInput" placeholder="Search by title..."
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="flex items-end">
+                    <button id="resetFilters" class="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-300">
+                        Reset Filters
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Recording History -->
-            <div class="md:col-span-1">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recording History</h3>
-                    <div id="recordingHistory" class="space-y-4">
-                        <!-- Recording history will be displayed here -->
-                    </div>
-                </div>
-            </div>
+        <!-- Videos Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="videosGrid">
+            <!-- Videos will be inserted here -->
         </div>
     </div>
 
@@ -93,163 +86,91 @@
             window.location.href = 'login.html';
         }
 
-        // Initialize recordings in localStorage if not exists
-        if (!localStorage.getItem('recordings')) {
-            localStorage.setItem('recordings', '[]');
-        }
-
-        let mediaRecorder;
-        let recordedChunks = [];
-        let stream;
-        let recordingInterval;
-        let recordingStartTime;
-
-        const videoElement = document.getElementById('videoElement');
-        const startBtn = document.getElementById('startBtn');
-        const recordBtn = document.getElementById('recordBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const playBtn = document.getElementById('playBtn');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const recordingStatus = document.getElementById('recordingStatus');
-        const recordingTime = document.getElementById('recordingTime');
-
-        // Start camera
-        startBtn.addEventListener('click', async () => {
+        function loadRecords(filters = {}) {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                videoElement.srcObject = stream;
-                startBtn.disabled = true;
-                recordBtn.disabled = false;
-                recordingStatus.textContent = 'Camera started';
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                recordingStatus.textContent = 'Error accessing camera';
-            }
-        });
+                const records = JSON.parse(localStorage.getItem('records') || '[]');
+                const grid = document.getElementById('videosGrid');
+                grid.innerHTML = '';
 
-        // Start recording
-        recordBtn.addEventListener('click', () => {
-            recordedChunks = [];
-            mediaRecorder = new MediaRecorder(stream);
+                records
+                    .filter(record => {
+                        const matchesClass = !filters.class || record.class === filters.class;
+                        const matchesType = !filters.type || record.ncertCbse === filters.type;
+                        const matchesSearch = !filters.search || 
+                            record.title.toLowerCase().includes(filters.search.toLowerCase());
+                        
+                        return matchesClass && matchesType && matchesSearch;
+                    })
+                    .forEach(record => {
+                        // Generate a unique ID if not exists
+                        if (!record.id) {
+                            record.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                        }
 
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    recordedChunks.push(e.data);
-                }
-            };
+                        const card = document.createElement('div');
+                        card.className = 'bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300';
+                        card.innerHTML = `
+                            <div class="aspect-w-16 aspect-h-9 relative">
+                                <img src="${record.imageLink}" alt="${record.title}" 
+                                    class="w-full h-48 object-cover"
+                                    onerror="this.src='https://via.placeholder.com/640x360.png?text=No+Preview+Available'">
+                                <button onclick="playVideo('${record.id}')"
+                                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                    <i class="fas fa-play text-white text-4xl"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">${record.title}</h3>
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Class ${record.class}
+                                    </span>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                        ${record.ncertCbse}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    Added by ${record.created_by}
+                                </p>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
 
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                addToHistory(url);
-                playBtn.disabled = false;
-                downloadBtn.disabled = false;
-            };
-
-            mediaRecorder.start();
-            recordingStartTime = Date.now();
-            updateRecordingTime();
-            recordingInterval = setInterval(updateRecordingTime, 1000);
-
-            recordBtn.disabled = true;
-            stopBtn.disabled = false;
-            recordingStatus.textContent = 'Recording...';
-        });
-
-        // Stop recording
-        stopBtn.addEventListener('click', () => {
-            mediaRecorder.stop();
-            clearInterval(recordingInterval);
-            recordBtn.disabled = false;
-            stopBtn.disabled = true;
-            recordingStatus.textContent = 'Recording stopped';
-            recordingTime.textContent = '';
-        });
-
-        // Play recorded video
-        playBtn.addEventListener('click', () => {
-            if (recordedChunks.length > 0) {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                videoElement.srcObject = null;
-                videoElement.src = URL.createObjectURL(blob);
-                videoElement.play();
-            }
-        });
-
-        // Download recorded video
-        downloadBtn.addEventListener('click', () => {
-            if (recordedChunks.length > 0) {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `recording-${new Date().toISOString()}.webm`;
-                a.click();
-            }
-        });
-
-        function updateRecordingTime() {
-            const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
-            const minutes = Math.floor(duration / 60);
-            const seconds = duration % 60;
-            recordingTime.textContent = `Recording Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function addToHistory(videoUrl) {
-            try {
-                const recordings = JSON.parse(localStorage.getItem('recordings') || '[]');
-                const newRecording = {
-                    url: videoUrl,
-                    timestamp: new Date().toISOString(),
-                    user: currentUser
-                };
-                recordings.push(newRecording);
-                localStorage.setItem('recordings', JSON.stringify(recordings));
-                updateHistoryDisplay();
+                // Update localStorage with IDs if needed
+                localStorage.setItem('records', JSON.stringify(records));
             } catch (error) {
-                console.error('Error saving recording to history:', error);
+                console.error('Error loading records:', error);
             }
         }
 
-        function updateHistoryDisplay() {
-            const historyDiv = document.getElementById('recordingHistory');
-            const recordings = JSON.parse(localStorage.getItem('recordings') || '[]');
-            
-            historyDiv.innerHTML = '';
-            recordings.slice().reverse().forEach(recording => {
-                const recordingEntry = document.createElement('div');
-                recordingEntry.className = 'p-4 border rounded-lg hover:bg-gray-50';
-                
-                const timestamp = new Date(recording.timestamp).toLocaleString();
-                recordingEntry.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-800">Recording at ${timestamp}</span>
-                        <button onclick="playRecording('${recording.url}')" class="text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">By ${recording.user}</p>
-                `;
-                
-                historyDiv.appendChild(recordingEntry);
-            });
+        function playVideo(id) {
+            window.location.href = `video_player.html?id=${id}`;
         }
 
-        function playRecording(url) {
-            videoElement.srcObject = null;
-            videoElement.src = url;
-            videoElement.play();
-        }
+        // Event Listeners
+        document.getElementById('classFilter').addEventListener('change', updateFilters);
+        document.getElementById('typeFilter').addEventListener('change', updateFilters);
+        document.getElementById('searchInput').addEventListener('input', updateFilters);
 
-        // Clean up when leaving the page
-        window.addEventListener('beforeunload', () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            document.getElementById('classFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            updateFilters();
         });
 
-        // Initial history display
-        updateHistoryDisplay();
+        function updateFilters() {
+            const filters = {
+                class: document.getElementById('classFilter').value,
+                type: document.getElementById('typeFilter').value,
+                search: document.getElementById('searchInput').value
+            };
+            loadRecords(filters);
+        }
+
+        // Initial load
+        loadRecords();
     </script>
 </body>
 </html>
