@@ -1,69 +1,90 @@
+# Electron Auth App
 
-Built by https://www.blackbox.ai
-
----
-
-# Electron Authentication App
-
-## Project Overview
-The **Electron Authentication App** is a desktop application built using Electron framework, designed to provide a simple authentication system along with a user-friendly dashboard interface. This project aims to demonstrate how to integrate authentication in a desktop application and manage user sessions effectively.
-
-## Installation
-To set up the project locally, follow these steps:
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/electron-auth-app.git
-   cd electron-auth-app
-   ```
-
-2. **Install the dependencies**:
-   Ensure that you have Node.js installed. Then run:
-   ```bash
-   npm install
-   ```
-
-## Usage
-After installing the dependencies, you can start the application with the following command:
-```bash
-npm start
-```
-This will open the Electron application where you can log in to access the dashboard.
+A cross-platform authentication and user management application with video recording capabilities.
 
 ## Features
-- User Authentication: Allows users to sign in and manage their sessions.
-- Simple Dashboard: A clean interface for accessing application features after logging in.
-- Easy Setup and Configuration: Simple installation process with basic dependencies only.
+- User Authentication (Login/Register)
+- User Management Dashboard
+- Record Management
+- Video Recording and Playback
+- User Activity Tracking
 
-## Dependencies
-The project utilizes the following dependencies, as specified in `package.json`:
-- `bcryptjs`: for hashing passwords securely.
-- `electron`: the framework used for building the desktop application.
+## Running the Application
 
-The complete list of dependencies can be found in the `package.json` file.
+### Windows Users
+1. Double-click `start.bat`
+2. The application will open in your default browser
+3. If it doesn't open automatically, visit: http://localhost:8000/login.html
 
-## Project Structure
-The project has a simple structure, consisting of the following key files and folders:
+### Linux/Mac Users
+```bash
+# Start the server
+python3 -m http.server 8000 --directory src/pages
 
-```
-electron-auth-app/
-├── package.json                # Project metadata and dependencies
-├── package-lock.json           # Version lock file for npm
-├── main.js                     # Main process script for Electron
-└── src/
-    └── pages/
-        ├── login.html          # Login page HTML
-        └── dashboard.html       # Dashboard page HTML (not referenced yet)
+# Then open in your browser
+http://localhost:8000/login.html
 ```
 
-### Main Files
-- `main.js`: The main process of the Electron application, which creates the application window and manages the lifecycle of the app.
-- `src/pages/login.html`: Basic HTML file for user login interface.
+## First Time Setup
+1. Click "Create Account" on the login page
+2. Use security code: 123456
+3. Fill in your details
+4. After registration, log in with your credentials
 
-### Future Development
-- Implement user registration.
-- Create event handling for user actions.
-- Enhance the dashboard functionality.
+## System Requirements
+- Python 3.x installed
+- Modern web browser (Chrome, Firefox, Edge, Safari)
+- Camera and microphone access for video features
 
-## Conclusion
-This Electron Authentication App serves as a basic template for building desktop applications with authentication capabilities. It can be expanded upon by integrating various features tailored to specific application needs. Feel free to contribute by forking the repository or opening issues for further enhancements.
+## Important Notes
+- All data is stored locally in your browser
+- Regular backups of browser data recommended
+- Application works offline after initial load
+- Default security code: 123456 (change in production)
+
+## Features Available
+1. User Management
+   - Registration with security code
+   - Login/Logout
+   - User activity tracking
+   - Account validity management
+
+2. Dashboard
+   - User statistics
+   - Activity monitoring
+   - System status
+
+3. Records Management
+   - Create and manage records
+   - Categorize records
+   - View record history
+
+4. Video Features
+   - Record video from camera
+   - Playback recordings
+   - Download recordings
+
+## Troubleshooting
+1. If the application doesn't start:
+   - Make sure Python is installed
+   - Check if port 8000 is available
+   - Try running the server manually:
+     ```bash
+     python -m http.server 8000 --directory src/pages
+     ```
+
+2. If CSS is not loading:
+   - Clear browser cache
+   - Check internet connection (needed for initial load)
+   - Refresh the page
+
+3. If video features don't work:
+   - Grant camera/microphone permissions
+   - Use a modern browser
+   - Check device drivers
+
+## Security Notes
+- Change the security code in production
+- Data is stored in browser's localStorage
+- Clear browser data to remove all application data
+- No server-side storage is used
